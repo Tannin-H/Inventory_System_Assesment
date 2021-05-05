@@ -1,6 +1,7 @@
 from tkinter import *
 from pickle import dump
 from tkinter import messagebox
+from tkinter import simpledialog
 from tkinter import Canvas
 
 
@@ -15,14 +16,7 @@ class Item:
 class Inventory_GUI:
     def __init__(self, parent):
         self.item_list = [Item("jacket", 12, 5, "warehouse"), Item("Pants", 14, 2, "kmart"), Item("Shirt", 9, 11, "T7"),
-                          Item("Shoes", 19, 5, "Nike"), Item("Wakatipu Bucket Hat", 100, 2, "WHS"),
-                          Item("jacket", 12, 5, "warehouse"), Item("Pants", 14, 2, "kmart"), Item("Shirt", 9, 11, "T7"),
-                          Item("Shoes", 19, 5, "Nike"), Item("Wakatipu Bucket Hat", 100, 2, "WHS"),
-                          Item("jacket", 12, 5, "warehouse"), Item("Pants", 14, 2, "kmart"), Item("Shirt", 9, 11, "T7"),
-                          Item("Shoes", 19, 5, "Nike"), Item("Wakatipu Bucket Hat", 100, 2, "WHS"),
-                          Item("jacket", 12, 5, "warehouse"), Item("Pants", 14, 2, "kmart"), Item("Shirt", 9, 11, "T7"),
-                          Item("Shoes", 19, 5, "Nike"), Item("Wakatipu Bucket Hat", 100, 2, "WHS")
-                          ]
+                          Item("Shoes", 19, 5, "Nike"), Item("Wakatipu Bucket Hat", 100, 2, "WHS")]
         self.item_var = IntVar()
         self.items_radbtns = []
         self.price_lbls = []
@@ -41,86 +35,107 @@ class Inventory_GUI:
         save_btn = Button(parent, text="Save Inventory", command=self.save_inventory)
         save_btn.grid(column=3, row=0, sticky=E + W + N)
 
-        canvas = Canvas(parent)
-        scroll_y = Scrollbar(parent, orient="vertical", command=canvas.yview)
+        self.canvas = Canvas(parent)
+        scroll_y = Scrollbar(parent, orient="vertical", command=self.canvas.yview)
 
-        frame = Frame(canvas)
+        self.frame = Frame(self.canvas, bg="white")
 
         # creating the inventory items and packing them into the frame
-        product_label = Label(frame, text="Product")
+        product_label = Label(self.frame, text="Product", bg="white", font=("Helvetica Neue", 15))
         product_label.grid(column=0, row=0, sticky=W + N)
 
-        price_label = Label(frame, text="Price")
+        price_label = Label(self.frame, text="Price", bg="white", font=("Helvetica Neue", 15))
         price_label.grid(column=1, row=0, sticky=W + N)
 
-        quantity_label = Label(frame, text="Qty")
+        quantity_label = Label(self.frame, text="Qty", bg="white", font=("Helvetica Neue", 15))
         quantity_label.grid(column=2, row=0, sticky=W + N)
 
-        seller_label = Label(frame, text="Seller")
+        seller_label = Label(self.frame, text="Seller", bg="white", font=("Helvetica Neue", 15))
         seller_label.grid(column=3, row=0, sticky=W + N)
 
         for item in range(len(self.item_list)):
             self.items_radbtns.append(
-                Radiobutton(frame, text=self.item_list[item].name, bg="white", value=item,
+                Radiobutton(self.frame, text=self.item_list[item].name, bg="white", value=item,
                             variable=self.item_var))
             self.items_radbtns[item].grid(column=0, row=item + 1, padx=5, sticky=W + N)
 
         for item in range(len(self.item_list)):
             self.price_lbls.append(
-                Label(frame, text=self.item_list[item].price, bg="white", ))
+                Label(self.frame, text="$" + str(self.item_list[item].price), bg="white", ))
             self.price_lbls[item].grid(column=1, row=item + 1, padx=5, sticky=W + N)
 
         for item in range(len(self.item_list)):
             self.qty_lbls.append(
-                Label(frame, text=self.item_list[item].qty, bg="white", ))
+                Label(self.frame, text=self.item_list[item].qty, bg="white", ))
             self.qty_lbls[item].grid(column=2, row=item + 1, padx=5, sticky=W + N)
 
         for item in range(len(self.item_list)):
             self.seller_lbls.append(
-                Label(frame, text=self.item_list[item].vendor, bg="white", anchor="w"))
+                Label(self.frame, text=self.item_list[item].vendor, bg="white", anchor="w"))
             self.seller_lbls[item].grid(column=3, row=item + 1, padx=5, sticky=W + N)
 
-        # put the frame in the canvas
-        canvas.create_window(0, 0, anchor='nw', window=frame)
+        # put the frame in the self.canvas
+        self.canvas.create_window(0, 0, anchor='nw', window=self.frame)
         # make sure everything is displayed before configuring the scrollregion
-        canvas.update_idletasks()
+        self.canvas.update_idletasks()
 
-        canvas.configure(scrollregion=canvas.bbox('all'),
-                         yscrollcommand=scroll_y.set, width=500)
+        self.canvas.configure(scrollregion=self.canvas.bbox('all'),
+                              yscrollcommand=scroll_y.set, width=400)
 
-        canvas.grid(column=0, row=2)
-        scroll_y.grid(column=1, row=2, sticky=N + S)
-
-        """v_bar = Scrollbar(items_frame)
-        v_bar.grid(column=2, row=0)
-        canvas = Canvas(items_frame, yscrollcommand=v_bar.set)
-        for item in range(len(self.item_list)):
-            self.items_radbtns.append(
-                Radiobutton(canvas, text=self.item_list[item].name, bg="white", value=item,
-                            variable=self.item_var))
-            self.items_radbtns[item].grid(column=0, row=item, padx=0, sticky=W + N)
-        canvas.grid(column=0, row=0)
-        v_bar.config(command=canvas.yview)
-"""
-        """
-        canvas = Canvas(items_frame)
-        canvas.create_line(15, 120, 200, 120)
-        canvas.grid(column=0, row=0)"""
-
-        """inventory_listbox = Listbox(items_frame, bd=0)
-        inventory_listbox.grid(column=0, row=0, sticky=E + W + N)
-        inventory_listbox.insert(END, "First Item")
-        inventory_listbox.insert(END, "Second Item")
-        inventory_listbox.insert(END, "Third Item")"""
+        self.canvas.grid(column=0, row=2, columnspan=4, sticky=E)
+        scroll_y.grid(column=4, row=2, sticky=N + S)
 
     def sell_item(self):
-        pass
+        items_sold = simpledialog.askinteger(title="Sell Item Entry", prompt="Enter number of items to be sold")
+        current_qty = self.item_list[self.item_var.get()].qty - items_sold
+        while self.item_list[self.item_var.get()].qty - items_sold < 0:
+            messagebox.showerror("ERROR",
+                                 "you have tried to sell more items than in stock please enter a lower integer")
+            items_sold = simpledialog.askinteger(title="Sell Item Entry", prompt="Enter number of items to be sold")
+            current_qty = 0
+        self.item_list[self.item_var.get()].qty = current_qty
+        self.qty_lbls[self.item_var.get()].configure(text=current_qty)
 
     def restock_item(self):
-        pass
+        items_restocked = simpledialog.askinteger(title="Restock Item Entry", prompt="Enter number of items to be "
+                                                                                     "Restocked")
+        while items_restocked < 0:
+            messagebox.showerror("ERROR",
+                                 "Input not valid please enter a positive value")
+            items_restocked = simpledialog.askinteger(title="Restock Item Entry", prompt="Enter number of items to be "
+                                                                                         "Restocked")
+        restocked_qty = self.item_list[self.item_var.get()].qty + items_restocked
+        self.item_list[self.item_var.get()].qty = restocked_qty
+        self.qty_lbls[self.item_var.get()].configure(text=restocked_qty)
 
     def add_item(self):
-        pass
+        splash_screen = Toplevel(root)
+        lbl_names = ["Name:", "Price:", "Quantity:", "Vendor:"]
+        lbl_list = []
+
+        descrp_lbl = Label(splash_screen, text="Please Enter Product Details")
+        descrp_lbl.grid(column=0, row=0, columnspan=2, sticky=E + W)
+
+        for name in range(len(lbl_names)):
+            lbl_list.append(Label(splash_screen, text=lbl_names[name]))
+            lbl_list[name].grid(column=0, row=name + 1)
+
+        name_var = StringVar()
+        price_var = IntVar()
+        qty_var = IntVar()
+        vendor_var = StringVar()
+
+        name_entry = Entry(splash_screen, textvariable=name_var)
+        name_entry.grid(column=1, row=1)
+
+        price_entry = Entry(splash_screen, textvariable=price_var)
+        price_entry.grid(column=1, row=2)
+
+        qty_entry = Entry(splash_screen, textvariable=qty_var)
+        qty_entry.grid(column=1, row=3)
+
+        vendor_entry = Entry(splash_screen, textvariable=vendor_var)
+        vendor_entry.grid(column=1, row=4)
 
     def save_inventory(self):
         pass
