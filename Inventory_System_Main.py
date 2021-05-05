@@ -25,6 +25,9 @@ class Inventory_GUI:
                           ]
         self.item_var = IntVar()
         self.items_radbtns = []
+        self.price_lbls = []
+        self.qty_lbls = []
+        self.seller_lbls = []
 
         sell_btn = Button(parent, text="Sell", command=self.sell_item)
         sell_btn.grid(column=0, row=0, sticky=E + W + N)
@@ -38,20 +41,57 @@ class Inventory_GUI:
         save_btn = Button(parent, text="Save Inventory", command=self.save_inventory)
         save_btn.grid(column=3, row=0, sticky=E + W + N)
 
-        product_label = Label(parent, text="Product")
-        product_label.grid(column=0, row=1, sticky=E + W + N)
+        canvas = Canvas(parent)
+        scroll_y = Scrollbar(parent, orient="vertical", command=canvas.yview)
 
-        price_label = Label(parent, text="Price")
-        price_label.grid(column=1, row=1, sticky=E + W + N)
+        frame = Frame(canvas)
 
-        quantity_label = Label(parent, text="Quantity")
-        quantity_label.grid(column=2, row=1, sticky=E + W + N)
+        # creating the inventory items and packing them into the frame
+        product_label = Label(frame, text="Product")
+        product_label.grid(column=0, row=0, sticky=W + N)
 
-        seller_label = Label(parent, text="Seller")
-        seller_label.grid(column=3, row=1, sticky=E + W + N)
+        price_label = Label(frame, text="Price")
+        price_label.grid(column=1, row=0, sticky=W + N)
 
-        items_frame = Frame(parent)
-        v_bar = Scrollbar(items_frame)
+        quantity_label = Label(frame, text="Qty")
+        quantity_label.grid(column=2, row=0, sticky=W + N)
+
+        seller_label = Label(frame, text="Seller")
+        seller_label.grid(column=3, row=0, sticky=W + N)
+
+        for item in range(len(self.item_list)):
+            self.items_radbtns.append(
+                Radiobutton(frame, text=self.item_list[item].name, bg="white", value=item,
+                            variable=self.item_var))
+            self.items_radbtns[item].grid(column=0, row=item + 1, padx=5, sticky=W + N)
+
+        for item in range(len(self.item_list)):
+            self.price_lbls.append(
+                Label(frame, text=self.item_list[item].price, bg="white", ))
+            self.price_lbls[item].grid(column=1, row=item + 1, padx=5, sticky=W + N)
+
+        for item in range(len(self.item_list)):
+            self.qty_lbls.append(
+                Label(frame, text=self.item_list[item].qty, bg="white", ))
+            self.qty_lbls[item].grid(column=2, row=item + 1, padx=5, sticky=W + N)
+
+        for item in range(len(self.item_list)):
+            self.seller_lbls.append(
+                Label(frame, text=self.item_list[item].vendor, bg="white", anchor="w"))
+            self.seller_lbls[item].grid(column=3, row=item + 1, padx=5, sticky=W + N)
+
+        # put the frame in the canvas
+        canvas.create_window(0, 0, anchor='nw', window=frame)
+        # make sure everything is displayed before configuring the scrollregion
+        canvas.update_idletasks()
+
+        canvas.configure(scrollregion=canvas.bbox('all'),
+                         yscrollcommand=scroll_y.set, width=500)
+
+        canvas.grid(column=0, row=2)
+        scroll_y.grid(column=1, row=2, sticky=N + S)
+
+        """v_bar = Scrollbar(items_frame)
         v_bar.grid(column=2, row=0)
         canvas = Canvas(items_frame, yscrollcommand=v_bar.set)
         for item in range(len(self.item_list)):
@@ -61,20 +101,17 @@ class Inventory_GUI:
             self.items_radbtns[item].grid(column=0, row=item, padx=0, sticky=W + N)
         canvas.grid(column=0, row=0)
         v_bar.config(command=canvas.yview)
-
+"""
         """
         canvas = Canvas(items_frame)
         canvas.create_line(15, 120, 200, 120)
         canvas.grid(column=0, row=0)"""
 
-        """inventory_listbox = Listbox(items_frame)
+        """inventory_listbox = Listbox(items_frame, bd=0)
         inventory_listbox.grid(column=0, row=0, sticky=E + W + N)
         inventory_listbox.insert(END, "First Item")
         inventory_listbox.insert(END, "Second Item")
-        inventory_listbox.insert(END, "Third Item")
-      """
-
-        items_frame.grid(column=0, row=2, sticky=W + N, columnspan=4)
+        inventory_listbox.insert(END, "Third Item")"""
 
     def sell_item(self):
         pass
