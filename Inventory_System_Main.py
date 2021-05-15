@@ -1,9 +1,11 @@
 from tkinter import *
-from pickle import dump
+import pickle
 from tkinter import messagebox
 from tkinter import simpledialog
 from tkinter import Canvas
 
+
+# try except to catch error when clicking cancel on the restock/sell window using the TypeError to catch the except
 
 class Item:
     def __init__(self, name, price, qty, vendor):
@@ -15,8 +17,10 @@ class Item:
 
 class Inventory_GUI:
     def __init__(self, parent):
-        self.item_list = [Item("jacket", 12, 5, "warehouse"), Item("Pants", 14, 2, "kmart"), Item("Shirt", 9, 11, "T7"),
-                          Item("Shoes", 19, 5, "Nike"), Item("Wakatipu Bucket Hat", 100, 2, "WHS")]
+        pickle_in = open("inventory_database", "rb")
+        self.item_list = pickle.load(pickle_in)
+        pickle_in.close()
+
         self.item_var = IntVar()
         self.items_radbtns = []
         self.price_lbls = []
@@ -83,28 +87,41 @@ class Inventory_GUI:
         self.scroll_y.grid(column=4, row=2, sticky=N + S)
 
     def sell_item(self):
-        items_sold = simpledialog.askinteger(title="Sell Item Entry", prompt="Enter number of items to be sold")
-        current_qty = self.item_list[self.item_var.get()].qty - items_sold
-        while self.item_list[self.item_var.get()].qty - items_sold < 0:
-            messagebox.showerror("ERROR",
-                                 "you have tried to sell more items than in stock please enter a lower integer")
+        try:
             items_sold = simpledialog.askinteger(title="Sell Item Entry", prompt="Enter number of items to be sold")
-            current_qty = 0
-        self.item_list[self.item_var.get()].qty = current_qty
-        self.qty_lbls[self.item_var.get()].configure(text=current_qty)
+            while items_sold <= 0:
+                messagebox.showerror("ERROR",
+                                     "Input not valid please enter a positive value excluding 0")
+                items_sold = simpledialog.askinteger(title="Sell Item Entry", prompt="Enter number of items to be sold")
+
+            current_qty = self.item_list[self.item_var.get()].qty - items_sold
+            while self.item_list[self.item_var.get()].qty - items_sold < 0:
+                messagebox.showerror("ERROR",
+                                     "you have tried to sell more items than in stock please enter a lower integer")
+                items_sold = simpledialog.askinteger(title="Sell Item Entry", prompt="Enter number of items to be sold")
+                current_qty = 0
+            self.item_list[self.item_var.get()].qty = current_qty
+            self.qty_lbls[self.item_var.get()].configure(text=current_qty)
+        except TypeError:
+            pass
 
     def restock_item(self):
-        items_restocked = simpledialog.askinteger(title="Restock Item Entry", prompt="Enter number of items to be "
-                                                                                     "Restocked")
-        while items_restocked < 0:
-            messagebox.showerror("ERROR",
-                                 "Input not valid please enter a positive value")
+        try:
             items_restocked = simpledialog.askinteger(title="Restock Item Entry", prompt="Enter number of items to be "
                                                                                          "Restocked")
-        print(self.item_var.get())
-        restocked_qty = self.item_list[self.item_var.get()].qty + items_restocked
-        self.item_list[self.item_var.get()].qty = restocked_qty
-        self.qty_lbls[self.item_var.get()].configure(text=restocked_qty)
+            while items_restocked <= 0:
+                messagebox.showerror("ERROR",
+                                     "Input not valid please enter a positive value excluding 0")
+                items_restocked = simpledialog.askinteger(title="Restock Item Entry",
+                                                          prompt="Enter number of items to be "
+                                                                 "Restocked")
+            print(self.item_var.get())
+            restocked_qty = self.item_list[self.item_var.get()].qty + items_restocked
+            self.item_list[self.item_var.get()].qty = restocked_qty
+            self.qty_lbls[self.item_var.get()].configure(text=restocked_qty)
+
+        except TypeError:
+            pass
 
     def add_item(self):
         self.splash_screen = Toplevel(root)
@@ -129,21 +146,37 @@ class Inventory_GUI:
         price_entry = Entry(self.splash_screen, textvariable=self.price_var)
         price_entry.grid(column=1, row=2)
 
+        reg = root.register(check_float)
+        price_entry.config(validate="key", validatecommand=(reg, '%P'))
+
         qty_entry = Entry(self.splash_screen, textvariable=self.qty_var)
         qty_entry.grid(column=1, row=3)
+
+        assign = root.register(check_int)
+        qty_entry.config(validate="key", validatecommand=(assign, '%P'))
 
         vendor_entry = Entry(self.splash_screen, textvariable=self.vendor_var)
         vendor_entry.grid(column=1, row=4)
 
-        submit_btn = Button(self.splash_screen, text="Submit Product", command=self.destroy_splashscreen)
-        submit_btn.grid(column=0, row=5, columnspan=2, sticky=E + W, pady=10)
+        cancel_btn = Button(self.splash_screen, text="Cancel", command=self.close_splashscreen)
+        cancel_btn.grid(column=0, row=5, sticky=E + W, pady=10)
 
-    def destroy_splashscreen(self):
-        self.item_list.append(
-            Item(self.name_var.get(), int(self.price_var.get()), int(self.qty_var.get()), self.vendor_var.get()))
-        self.update_list()
+        submit_btn = Button(self.splash_screen, text="Submit Product", command=self.destroy_splashscreen_save)
+        submit_btn.grid(column=1, row=5, sticky=E + W, pady=10)
+
+    def close_splashscreen(self):
         self.splash_screen.destroy()
         self.splash_screen.update()
+
+    def destroy_splashscreen_save(self):
+        if self.name_var.get() == "" or self.price_var.get() == "" or self.qty_var.get() == "" or self.vendor_var.get() == "":
+            messagebox.showerror("ERROR", "You have left one or more of the required fields blank")
+        else:
+            self.item_list.append(
+                Item(self.name_var.get(), float(self.price_var.get()), int(self.qty_var.get()), self.vendor_var.get()))
+            self.update_list()
+            self.splash_screen.destroy()
+            self.splash_screen.update()
 
     def update_list(self):
         self.items_radbtns.append(
@@ -170,10 +203,31 @@ class Inventory_GUI:
 
         print(len(self.item_list))
 
-        # This version displays the correct values and works but breaks when you try and sell a product
-
     def save_inventory(self):
-        pass
+        pickle_out = open("inventory_database", "wb")
+        pickle.dump(self.item_list, pickle_out)
+        pickle_out.close()
+        messagebox.showinfo("Inventory", "Inventory has been saved to file")
+
+
+def check_float(float_input_entry):
+    try:
+        float(float_input_entry)
+        return True
+    except ValueError:
+        return False
+
+
+def check_int(int_input_entry):
+    # just want to explain to the user why they can't enter a period but need coles help but he could sya it unnecessary
+    try:
+        if int_input_entry == ".":
+            messagebox.showerror("ERROR", "A decimal point was entered floating point values are not accepted in this "
+                                          "field ")
+        int(int_input_entry)
+        return True
+    except ValueError:
+        return False
 
 
 if __name__ == '__main__':
