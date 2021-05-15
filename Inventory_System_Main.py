@@ -247,6 +247,8 @@ class Inventory_GUI:
 # called when running the add new item window to the price field and trys' to convert the character to a float and
 # returns true if it is possible and false if its impossible
 def check_float(float_input_entry):
+    if float_input_entry == "":
+        return True
     try:
         float(float_input_entry)
         return True
@@ -257,6 +259,8 @@ def check_float(float_input_entry):
 # called when running the add new item window to the quantity field and try's to convert the character to a int and
 # returns true if it is possible and false if its impossible
 def check_int(int_input_entry):
+    if int_input_entry == "":
+        return True
     try:
         int(int_input_entry)
         return True
