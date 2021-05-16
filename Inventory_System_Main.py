@@ -46,7 +46,7 @@ class Inventory_GUI:
 
         self.frame = Frame(self.canvas, bg="white")
 
-        # creating the inventory items fields and packing them into the frame
+        # creating the inventory items headers and packing them into the frame
         product_label = Label(self.frame, text="Product", bg="white", font=("Helvetica Neue", 15))
         product_label.grid(column=0, row=0, sticky=W + N)
 
@@ -58,6 +58,7 @@ class Inventory_GUI:
 
         seller_label = Label(self.frame, text="Seller", bg="white", font=("Helvetica Neue", 15))
         seller_label.grid(column=3, row=0, sticky=W + N)
+
         # looping through and creating all the clickable radio buttons
         for item in range(len(self.item_list)):
             self.items_radbtns.append(
